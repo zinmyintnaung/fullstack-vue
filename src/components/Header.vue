@@ -18,7 +18,7 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <router-link class="nav-link active" to="/"
-                            >Home
+                            >List Contacts
                             <span class="visually-hidden">(current)</span>
                         </router-link>
                     </li>

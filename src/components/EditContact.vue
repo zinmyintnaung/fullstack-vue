@@ -10,7 +10,7 @@
                     </ul>
                 </div>
 
-                <form @submit.prevent="saveContact" novalidate>
+                <form @submit.prevent="updateContact()" novalidate>
                     <fieldset>
                         <div class="form-group">
                             <label class="form-label mt-4"></label>
@@ -48,7 +48,7 @@
                                 v-model="contact.contact_no"
                             />
                         </div>
-                        <button class="btn btn-primary mt-4">Save</button>
+                        <button class="btn btn-primary mt-4">Update</button>
                     </fieldset>
                 </form>
             </div>
@@ -57,9 +57,10 @@
 </template>
 
 <script>
+import router from "@/routes/routes";
 import axios from "axios";
 export default {
-    name: "AddContact",
+    name: "EditContact",
     data() {
         return {
             contact: {},
@@ -70,8 +71,23 @@ export default {
             errors: [],
         };
     },
+    created() {
+        this.getContactById();
+    },
     methods: {
-        async saveContact() {
+        async getContactById() {
+            let url = `http://localhost:8000/api/get_contact/${this.$route.params.id}`;
+            await axios
+                .get(url)
+                .then((response) => {
+                    this.contact = response.data.contact;
+                    console.log(response);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        },
+        async updateContact() {
             this.errors = [];
             if (!this.contact.name) {
                 this.errors.push("Name is required");
@@ -85,24 +101,24 @@ export default {
             if (!this.contact.contact_no) {
                 this.errors.push("Contact is required");
             }
-            //create form data if there is no errors
             if (!this.errors.length) {
                 let formData = new FormData();
                 formData.append("name", this.contact.name);
                 formData.append("email", this.contact.email);
                 formData.append("designation", this.contact.designation);
                 formData.append("contact_no", this.contact.contact_no);
-                let url = "http://localhost:8000/api/save_contact";
+
+                let url = `http://localhost:8000/api/update_contact/${this.$route.params.id}`;
+
+                //console.log(formData);
+
                 await axios
                     .post(url, formData)
                     .then((response) => {
-                        console.log(response);
+                        //console.log(response);
                         if (response.status === 200) {
-                            this.contact.name = "";
-                            this.contact.email = "";
-                            this.contact.designation = "";
-                            this.contact.contact_no = "";
                             alert(response.data.message);
+                            router.push("/");
                         }
                     })
                     .catch((error) => {
@@ -111,6 +127,9 @@ export default {
                     });
             }
         },
+    },
+    mounted() {
+        console.log("Edit Contact Component Mounted!");
     },
 };
 </script>
